@@ -1,8 +1,14 @@
 package com.udacity.asteroidradar
 
+import android.util.Log
+import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.udacity.asteroidradar.main.AsteroidListAdapter
+import com.udacity.asteroidradar.main.NasaApiStatus
 
 @BindingAdapter("statusIcon")
 fun bindAsteroidStatusImage(imageView: ImageView, isHazardous: Boolean) {
@@ -38,4 +44,37 @@ fun bindTextViewToKmUnit(textView: TextView, number: Double) {
 fun bindTextViewToDisplayVelocity(textView: TextView, number: Double) {
     val context = textView.context
     textView.text = String.format(context.getString(R.string.km_s_unit_format), number)
+}
+
+/**
+ * When there is no Mars property data (data is null), hide the [RecyclerView], otherwise show it.
+ */
+@BindingAdapter("listData")
+fun bindRecyclerView(recyclerView: RecyclerView, data: List<Asteroid>?) {
+    val adapter = recyclerView.adapter as AsteroidListAdapter
+    adapter.submitList(data)
+}
+
+/**
+ * This binding adapter displays the [NasaApiStatus] of the network request in a ProgressBar.  When
+ * the request is loading, it displays a loading_animation.  If the request has an error, it
+ * displays a broken image to reflect the connection error.  When the request is finished, it
+ * hides the image view.
+ */
+@BindingAdapter("marsApiStatus")
+fun bindStatus(statusProgressBar: ProgressBar, status: NasaApiStatus?) {
+    when (status) {
+        NasaApiStatus.LOADING -> {
+            statusProgressBar.visibility = View.VISIBLE
+            Log.v("MyActivity", "LOADING")
+        }
+        NasaApiStatus.ERROR -> {
+            statusProgressBar.visibility = View.GONE
+            Log.v("MyActivity", "ERROR")
+        }
+        NasaApiStatus.DONE -> {
+            statusProgressBar.visibility = View.GONE
+            Log.v("MyActivity", "DONE")
+        }
+    }
 }
