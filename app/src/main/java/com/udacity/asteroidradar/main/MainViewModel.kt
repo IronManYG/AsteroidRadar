@@ -5,12 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.domain.Asteroid
 import com.udacity.asteroidradar.Constants
 import com.udacity.asteroidradar.api.END_DATE
 import com.udacity.asteroidradar.api.NasaApi
 import com.udacity.asteroidradar.api.START_DATE
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -58,7 +59,7 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             _status.value = NasaApiStatus.LOADING
             try {
-                val content = NasaApi.retrofitService.getAsteroids(START_DATE,END_DATE,Constants.API_KEY)
+                val content = async{NasaApi.retrofitService.getAsteroids(START_DATE,END_DATE,Constants.API_KEY)}.await()
                 Log.v("MainViewModel", content)
                 val obj = JSONObject(content)
                 _asteroids.value = parseAsteroidsJsonResult(obj).toMutableList()

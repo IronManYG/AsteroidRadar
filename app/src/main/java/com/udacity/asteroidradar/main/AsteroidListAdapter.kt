@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.domain.Asteroid
 import com.udacity.asteroidradar.databinding.LinearViewItemBinding
 
 
@@ -68,8 +68,8 @@ class AsteroidListAdapter(val onClickListener: OnClickListener ) :
      * associated with the current item to the [onClick] function.
      * @param clickListener lambda that will be called with the current [Asteroid]
      */
-    class OnClickListener(val clickListener: (asteroid:Asteroid) -> Unit) {
-        fun onClick(asteroid:Asteroid) = clickListener(asteroid)
+    class OnClickListener(val clickListener: (asteroid: Asteroid) -> Unit) {
+        fun onClick(asteroid: Asteroid) = clickListener(asteroid)
     }
 
 }

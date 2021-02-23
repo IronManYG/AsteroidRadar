@@ -7,6 +7,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.udacity.asteroidradar.domain.Asteroid
 import com.udacity.asteroidradar.main.AsteroidListAdapter
 import com.udacity.asteroidradar.main.NasaApiStatus
 
