@@ -33,7 +33,7 @@ class MainFragment : Fragment() {
             if (null!=it ){
                 this.findNavController().navigate(MainFragmentDirections.actionShowDetail(it))
 
-                viewModel.displayPropertyDetailsComplete()
+                viewModel.displayAsteroidDetailsComplete()
             }
         })
 

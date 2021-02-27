@@ -5,8 +5,12 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Callback
+import com.squareup.picasso.NetworkPolicy
+import com.squareup.picasso.Picasso
 import com.udacity.asteroidradar.main.AsteroidListAdapter
 import com.udacity.asteroidradar.main.NasaApiStatus
 
@@ -61,7 +65,7 @@ fun bindRecyclerView(recyclerView: RecyclerView, data: List<Asteroid>?) {
  * displays a broken image to reflect the connection error.  When the request is finished, it
  * hides the image view.
  */
-@BindingAdapter("marsApiStatus")
+@BindingAdapter("nasaApiStatus")
 fun bindStatus(statusProgressBar: ProgressBar, status: NasaApiStatus?) {
     when (status) {
         NasaApiStatus.LOADING -> {
@@ -76,5 +80,35 @@ fun bindStatus(statusProgressBar: ProgressBar, status: NasaApiStatus?) {
             statusProgressBar.visibility = View.GONE
             Log.v("MyActivity", "DONE")
         }
+    }
+}
+
+@BindingAdapter("imageOfTheDay")
+fun loadImageWithUri(imageView: ImageView, urlPic: String?){
+    urlPic?.let {
+        val imgUri = urlPic.toUri().buildUpon().scheme("https").build()
+        Picasso.get()
+            .load(imgUri)
+            .networkPolicy(NetworkPolicy.OFFLINE)
+            .into(imageView, object : Callback {
+                override fun onSuccess() {
+                    //Offline Cache hit
+                }
+                override fun onError(e: Exception?) {
+                    //Try again online if cache failed
+                    Picasso.get()
+                        .load(imgUri)
+                        .into(imageView)
+                }
+            })
+    }
+}
+
+@BindingAdapter("asteroidImageDescription")
+fun bindAsteroidImageDescription(imageView: ImageView, isHazardous: Boolean) {
+    if (isHazardous) {
+        imageView.contentDescription = "Image of potentially hazardous asteroid"
+    } else {
+        imageView.contentDescription = "Image of happy, not hazardous asteroid"
     }
 }

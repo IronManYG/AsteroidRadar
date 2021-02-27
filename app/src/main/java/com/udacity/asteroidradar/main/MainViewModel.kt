@@ -4,6 +4,10 @@ import android.app.Application
 import androidx.lifecycle.*
 import com.udacity.asteroidradar.database.getDatabase
 import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.Constants
+import com.udacity.asteroidradar.PictureOfDay
+import com.udacity.asteroidradar.api.NasaApi
+import com.udacity.asteroidradar.api.START_DATE
 import com.udacity.asteroidradar.repository.AsteroidRepository
 import kotlinx.coroutines.launch
 
@@ -21,6 +25,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val status: LiveData<NasaApiStatus>
         get() = _status
 
+    // Image of the day data
+    private val _dailyPicture = MutableLiveData<PictureOfDay>()
+    val dailyPicture: LiveData<PictureOfDay>
+        get() = _dailyPicture
 
     // Internally, we use a MutableLiveData to handle navigation to the selected property
     private val _navigateToSelectedAsteroids = MutableLiveData<Asteroid>()
@@ -30,7 +38,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         get() = _navigateToSelectedAsteroids
 
     // set filter for asteroid request
-    private val nasaApiFilter = MutableLiveData<NasaApiFilter>(NasaApiFilter.SHOW_ALL)
+    private val nasaApiFilter = MutableLiveData<NasaApiFilter>(NasaApiFilter.SHOW_WEEK)
 
     private val database = getDatabase(application)
     private val asteroidRepository = AsteroidRepository(database)
@@ -40,14 +48,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     init {
         viewModelScope.launch {
-            _status.value = NasaApiStatus.LOADING
-            try {
-                asteroidRepository.refreshAsteroid()
-                _status.value = NasaApiStatus.DONE
-            } catch (e: Exception){
-                e.printStackTrace()
-                _status.value = NasaApiStatus.ERROR
-            }
+            refreshImage()
+            refreshAsteroid()
         }
     }
 
@@ -56,6 +58,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             NasaApiFilter.SHOW_TODAY -> asteroidRepository.todayAsteroids
             NasaApiFilter.SHOW_WEEK -> asteroidRepository.weekAsteroid
             else -> asteroidRepository.asteroids
+        }
+    }
+
+    private suspend fun refreshImage() {
+        _status.value = NasaApiStatus.LOADING
+        try {
+            _dailyPicture.value = NasaApi.retrofitService.getImageOfTheDay(Constants.API_KEY)
+            _status.value = NasaApiStatus.DONE
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _status.value = NasaApiStatus.ERROR
+        }
+    }
+
+    private suspend fun refreshAsteroid() {
+        _status.value = NasaApiStatus.LOADING
+        try {
+            asteroidRepository.refreshAsteroid()
+            _status.value = NasaApiStatus.DONE
+        } catch (e: Exception){
+            e.printStackTrace()
+            _status.value = NasaApiStatus.ERROR
         }
     }
 
@@ -68,9 +92,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * After the navigation has taken place, make sure navigateToSelectedProperty is set to null
+     * After the navigation has taken place, make sure navigateToSelectedAsteroids is set to null
      */
-    fun displayPropertyDetailsComplete() {
+    fun displayAsteroidDetailsComplete() {
         _navigateToSelectedAsteroids.value = null
     }
 

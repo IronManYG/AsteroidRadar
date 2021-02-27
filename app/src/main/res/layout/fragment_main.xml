@@ -28,8 +28,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
+                android:contentDescription="@{viewModel.dailyPicture.title}"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/placeholder_picture_of_day"/>
+                app:imageOfTheDay="@{viewModel.dailyPicture.url}"/>
 
             <TextView
                 android:id="@+id/textView"
@@ -56,7 +57,7 @@
             app:layout_constraintTop_toBottomOf="@+id/activity_main_image_of_the_day_layout"
             app:layout_constraintVertical_bias="0.0"
             app:listData="@{viewModel.asteroids}"
-            tools:listitem="@layout/linear_view_item"/>
+            />
 
         <ProgressBar
             android:id="@+id/status_loading_wheel"
@@ -68,7 +69,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:marsApiStatus="@{viewModel.status}"/>
+            app:nasaApiStatus="@{viewModel.status}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
