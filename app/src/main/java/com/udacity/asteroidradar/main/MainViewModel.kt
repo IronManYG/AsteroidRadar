@@ -1,25 +1,19 @@
 package com.udacity.asteroidradar.main
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.udacity.asteroidradar.domain.Asteroid
-import com.udacity.asteroidradar.Constants
-import com.udacity.asteroidradar.api.END_DATE
-import com.udacity.asteroidradar.api.NasaApi
-import com.udacity.asteroidradar.api.START_DATE
-import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
-import kotlinx.coroutines.async
+import android.app.Application
+import androidx.lifecycle.*
+import com.udacity.asteroidradar.database.getDatabase
+import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.repository.AsteroidRepository
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 enum class NasaApiStatus { LOADING, ERROR, DONE }
+enum class NasaApiFilter { SHOW_TODAY, SHOW_WEEK, SHOW_ALL}
+
 /**
  * The [ViewModel] that is attached to the [MainViewModel].
  */
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     // The internal MutableLiveData that stores the status of the most recent request
     private val _status = MutableLiveData<NasaApiStatus>()
 
@@ -27,13 +21,6 @@ class MainViewModel : ViewModel() {
     val status: LiveData<NasaApiStatus>
         get() = _status
 
-    // Internally, we use a MutableLiveData, because we will be updating the List of Asteroid
-    // with new values
-    private val _asteroids = MutableLiveData<List<Asteroid>>()
-
-    // The external LiveData interface to the property is immutable, so only this class can modify
-    val asteroids: LiveData<List<Asteroid>>
-        get() = _asteroids
 
     // Internally, we use a MutableLiveData to handle navigation to the selected property
     private val _navigateToSelectedAsteroids = MutableLiveData<Asteroid>()
@@ -42,35 +29,35 @@ class MainViewModel : ViewModel() {
     val navigateToSelectedProperty: LiveData<Asteroid>
         get() = _navigateToSelectedAsteroids
 
+    // set filter for asteroid request
+    private val nasaApiFilter = MutableLiveData<NasaApiFilter>(NasaApiFilter.SHOW_ALL)
+
+    private val database = getDatabase(application)
+    private val asteroidRepository = AsteroidRepository(database)
+
     /**
      * Call getAsteroid() on init so we can display status immediately.
      */
     init {
-        getAsteroid()
-    }
-
-    /**
-     * Gets filtered Asteroid information from the Nasa API Retrofit service and
-     * updates the [Asteroid] [List] and [NasaApiStatus] [LiveData]. The Retrofit service
-     * returns a coroutine Deferred, which we await to get the result of the transaction.
-     * @param filter the [MarsApiFilter] that is sent as part of the web server request
-     */
-    private fun getAsteroid() {
         viewModelScope.launch {
             _status.value = NasaApiStatus.LOADING
             try {
-                val content = async{NasaApi.retrofitService.getAsteroids(START_DATE,END_DATE,Constants.API_KEY)}.await()
-                Log.v("MainViewModel", content)
-                val obj = JSONObject(content)
-                _asteroids.value = parseAsteroidsJsonResult(obj).toMutableList()
+                asteroidRepository.refreshAsteroid()
                 _status.value = NasaApiStatus.DONE
-            } catch (e: Exception) {
+            } catch (e: Exception){
+                e.printStackTrace()
                 _status.value = NasaApiStatus.ERROR
-                _asteroids.value = ArrayList()
             }
         }
     }
 
+    val asteroids = Transformations.switchMap(nasaApiFilter){
+        when(it){
+            NasaApiFilter.SHOW_TODAY -> asteroidRepository.todayAsteroids
+            NasaApiFilter.SHOW_WEEK -> asteroidRepository.weekAsteroid
+            else -> asteroidRepository.asteroids
+        }
+    }
 
     /**
      * When the asteroid is clicked, set the [_navigateToSelectedAsteroids] [MutableLiveData]
@@ -90,9 +77,19 @@ class MainViewModel : ViewModel() {
     /**
      * Updates the data set filter for the web services by querying the data with the new filter
      * by calling [getMarsRealEstateProperties]
-     * @param filter the [MarsApiFilter] that is sent as part of the web server request
+     * @param filter the [NasaApiFilter] that is sent as part of the web server request
      */
-    fun updateFilter() {
-        getAsteroid()
+    fun updateFilter(filter: NasaApiFilter) {
+        nasaApiFilter.value = filter
+    }
+
+    class Factory(val app: Application) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return MainViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unable to construct viewmodel")
+        }
     }
 }

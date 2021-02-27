@@ -1,4 +1,4 @@
-package com.udacity.asteroidradar.domain
+package com.udacity.asteroidradar
 
 import android.os.Parcelable
 import androidx.lifecycle.LiveData

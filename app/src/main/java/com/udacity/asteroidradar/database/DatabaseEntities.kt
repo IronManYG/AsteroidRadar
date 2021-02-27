@@ -2,7 +2,7 @@ package com.udacity.asteroidradar.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.udacity.asteroidradar.domain.Asteroid
+import com.udacity.asteroidradar.Asteroid
 
 @Entity
 data class DatabaseAsteroid constructor(
