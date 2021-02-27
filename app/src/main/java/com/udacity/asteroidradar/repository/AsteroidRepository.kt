@@ -10,6 +10,8 @@ import com.udacity.asteroidradar.Asteroid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AsteroidRepository(private val database: AsteroidsDatabase) {
 
@@ -28,5 +30,27 @@ class AsteroidRepository(private val database: AsteroidsDatabase) {
             val netAsteroid = NetworkAsteroidContainer(parseAsteroidsJsonResult(obj))
             database.asteroidDao.insertAll(*netAsteroid.asDatabaseModel())
         }
+    }
+
+    suspend fun refreshTodayAsteroids() {
+        withContext(Dispatchers.IO){
+            val content = withContext(Dispatchers.Default) { NasaApi.retrofitService.getAsteroids(START_DATE, START_DATE, Constants.API_KEY) }
+            val obj = JSONObject(content)
+            val netAsteroid = NetworkAsteroidContainer(parseAsteroidsJsonResult(obj))
+            database.asteroidDao.insertAll(*netAsteroid.asDatabaseModel())
+        }
+    }
+
+    suspend fun deleteYesterdayAsteroids() {
+        withContext(Dispatchers.IO) {
+            database.asteroidDao.deleteYesterday(getYesterday() )
+        }
+    }
+
+    private fun getYesterday() : String {
+        val dateFormat = SimpleDateFormat(Constants.API_QUERY_DATE_FORMAT, Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        return dateFormat.format(calendar.time)
     }
 }
