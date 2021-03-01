@@ -100,7 +100,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * Updates the data set filter for the web services by querying the data with the new filter
-     * by calling [getMarsRealEstateProperties]
+     * by calling []
      * @param filter the [NasaApiFilter] that is sent as part of the web server request
      */
     fun updateFilter(filter: NasaApiFilter) {

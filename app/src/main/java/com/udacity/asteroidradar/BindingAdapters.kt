@@ -70,15 +70,12 @@ fun bindStatus(statusProgressBar: ProgressBar, status: NasaApiStatus?) {
     when (status) {
         NasaApiStatus.LOADING -> {
             statusProgressBar.visibility = View.VISIBLE
-            Log.v("MyActivity", "LOADING")
         }
         NasaApiStatus.ERROR -> {
             statusProgressBar.visibility = View.GONE
-            Log.v("MyActivity", "ERROR")
         }
         NasaApiStatus.DONE -> {
             statusProgressBar.visibility = View.GONE
-            Log.v("MyActivity", "DONE")
         }
     }
 }

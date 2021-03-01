@@ -24,6 +24,7 @@
             android:id="@+id/codename"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/asteroid_codename"
             android:text="@{asteroid.codename}"
             android:textColor="@color/default_text_color"
             android:textSize="18sp"
@@ -37,6 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:contentDescription="@string/asteroid_closeapproachdate"
             android:text="@{asteroid.closeApproachDate}"
             android:textColor="@color/text_grey"
             android:textSize="18sp"
@@ -50,13 +52,14 @@
             android:id="@+id/status_potentially_hazardous"
             android:layout_width="24dp"
             android:layout_height="wrap_content"
+            app:asteroidImageDescription="@{asteroid.isPotentiallyHazardous}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_status_potentially_hazardous"
-            app:statusIcon="@{asteroid.isPotentiallyHazardous}" />
+            app:statusIcon="@{asteroid.isPotentiallyHazardous}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
